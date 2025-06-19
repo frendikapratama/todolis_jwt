@@ -9,13 +9,18 @@ class Checklist extends Model
 {
     use HasFactory;
 
-    protected $fillable = ['name', 'description'];
+     protected $fillable = ['user_id', 'name', 'description']; 
 
     protected $appends = ['total_items', 'completed_items'];
 
     public function items()
     {
         return $this->hasMany(ChecklistItem::class);
+    }
+
+    public function user()
+    {
+        return $this->belongsTo(User::class);
     }
 
     public function getTotalItemsAttribute()

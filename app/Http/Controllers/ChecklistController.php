@@ -5,16 +5,19 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use App\Models\Checklist;
 use Illuminate\Http\JsonResponse;
+use App\Http\Controllers\Controller; 
 
 class ChecklistController extends Controller
 {
-   public function store(Request $request): JsonResponse
+ 
+  public function store(Request $request): JsonResponse
     {
         $validated = $request->validate([
             'name' => 'required|string|max:255',
             'description' => 'nullable|string'
         ]);
 
+        $validated['user_id'] = auth('api')->id();
         $checklist = Checklist::create($validated);
 
         return response()->json([
@@ -24,10 +27,11 @@ class ChecklistController extends Controller
         ], 201);
     }
 
-    // 2. Menghapus checklist
     public function destroy($checklistId): JsonResponse
     {
-        $checklist = Checklist::find($checklistId);
+        $checklist = Checklist::where('user_id', auth('api')->id())
+                             ->where('id', $checklistId)
+                             ->first();
 
         if (!$checklist) {
             return response()->json([
@@ -44,10 +48,9 @@ class ChecklistController extends Controller
         ]);
     }
 
-    // 3. Menampilkan semua checklist
     public function index(): JsonResponse
     {
-        $checklists = Checklist::all();
+        $checklists = Checklist::where('user_id', auth('api')->id())->get();
 
         return response()->json([
             'success' => true,
@@ -56,10 +59,12 @@ class ChecklistController extends Controller
         ]);
     }
 
-    // 4. Detail checklist beserta items
     public function show($id): JsonResponse
     {
-        $checklist = Checklist::with('items')->find($id);
+        $checklist = Checklist::with('items')
+                             ->where('user_id', auth('api')->id())
+                             ->where('id', $id)
+                             ->first();
 
         if (!$checklist) {
             return response()->json([

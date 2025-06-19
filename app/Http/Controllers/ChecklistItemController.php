@@ -9,9 +9,16 @@ use Illuminate\Http\JsonResponse;
 
 class ChecklistItemController extends Controller
 {
-public function store(Request $request, $checklistId): JsonResponse
+    public function __construct()
     {
-        $checklist = Checklist::find($checklistId);
+        $this->middleware('auth:api'); 
+    }
+
+    public function store(Request $request, $checklistId): JsonResponse
+    {
+        $checklist = Checklist::where('user_id', auth('api')->id())
+                             ->where('id', $checklistId)
+                             ->first();
 
         if (!$checklist) {
             return response()->json([
@@ -36,10 +43,11 @@ public function store(Request $request, $checklistId): JsonResponse
         ], 201);
     }
 
-    // 6. Menampilkan items dari checklist tertentu
     public function index($checklistId): JsonResponse
     {
-        $checklist = Checklist::find($checklistId);
+        $checklist = Checklist::where('user_id', auth('api')->id())
+                             ->where('id', $checklistId)
+                             ->first();
 
         if (!$checklist) {
             return response()->json([
@@ -56,18 +64,15 @@ public function store(Request $request, $checklistId): JsonResponse
             'data' => $items
         ]);
     }
-
-    // 7. Mengubah item dalam checklist - TIDAK DIGUNAKAN sesuai kebutuhan
-    // Method ini tidak digunakan karena requirements hanya butuh update status dan rename
-
-    // 8. Mengubah status item (untuk endpoint PUT update status)
     public function updateStatus(Request $request, $checklistId, $checklistItemId): JsonResponse
     {
         $validated = $request->validate([
             'status' => 'required|in:proses,selesai'
         ]);
 
-        $checklist = Checklist::find($checklistId);
+        $checklist = Checklist::where('user_id', auth('api')->id())
+                             ->where('id', $checklistId)
+                             ->first();
 
         if (!$checklist) {
             return response()->json([
@@ -96,10 +101,11 @@ public function store(Request $request, $checklistId): JsonResponse
         ]);
     }
 
-    // 9. Menghapus item checklist
     public function destroy($checklistId, $checklistItemId): JsonResponse
     {
-        $checklist = Checklist::find($checklistId);
+        $checklist = Checklist::where('user_id', auth('api')->id())
+                             ->where('id', $checklistId)
+                             ->first();
 
         if (!$checklist) {
             return response()->json([
@@ -127,14 +133,15 @@ public function store(Request $request, $checklistId): JsonResponse
         ]);
     }
 
-    // TAMBAHAN: Method rename item sesuai kebutuhan
     public function rename(Request $request, $checklistId, $checklistItemId): JsonResponse
     {
         $validated = $request->validate([
             'name' => 'required|string|max:255'
         ]);
 
-        $checklist = Checklist::find($checklistId);
+        $checklist = Checklist::where('user_id', auth('api')->id())
+                             ->where('id', $checklistId)
+                             ->first();
 
         if (!$checklist) {
             return response()->json([
@@ -163,10 +170,11 @@ public function store(Request $request, $checklistId): JsonResponse
         ]);
     }
 
-    // Detail item tertentu
     public function show($checklistId, $checklistItemId): JsonResponse
     {
-        $checklist = Checklist::find($checklistId);
+        $checklist = Checklist::where('user_id', auth('api')->id())
+                             ->where('id', $checklistId)
+                             ->first();
 
         if (!$checklist) {
             return response()->json([
